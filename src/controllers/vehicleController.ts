@@ -20,7 +20,6 @@ export const addVehicle = async (req: Request, res: Response) => {
 export const getAvailableVehicles = async (req: Request, res: Response) => {
   try {
     const { capacityRequired, fromPincode, toPincode, startTime } = req.query;
-
     if (!capacityRequired || !fromPincode || !toPincode || !startTime) {
       return res.status(400).json({ error: 'Missing query parameters' });
     }
@@ -29,26 +28,26 @@ export const getAvailableVehicles = async (req: Request, res: Response) => {
     const duration = calculateRideDurationHours(fromPincode as string, toPincode as string);
     const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
 
-    const vehicles = await prisma.vehicle.findMany({
-      where: {
-        capacityKg: {
-          gte: Number(capacityRequired),
-        },
-        bookings: {
-          none: {
-            OR: [
-              {
-                startTime: { lt: end },
-                endTime: { gt: start },
-              }
-            ]
-          }
-        }
-      },
+    const candidates = await prisma.vehicle.findMany({
+      where: { capacityKg: { gte: Number(capacityRequired) } }
     });
 
-    res.status(200).json({ vehicles, estimatedRideDurationHours: duration });
+    const overlapping = await prisma.booking.findMany({
+      where: {
+        startTime: { lt: end },
+        endTime:   { gt: start }
+      },
+      select: { vehicleId: true }
+    });
+
+    const bookedIds = new Set(overlapping.map(b => b.vehicleId));
+
+    const available = candidates.filter(v => !bookedIds.has(v.id));
+
+    res.status(200).json({ vehicles: available, estimatedRideDurationHours: duration });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 };
+
