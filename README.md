@@ -1,6 +1,6 @@
 # FleetLink Backend 🚚
 
-Backend service for **FleetLink** – a logistics vehicle booking system for B2B clients.  
+Backend service for **FleetLink**.  
 This service handles vehicle management, availability checking, and booking operations.
 
 ---
