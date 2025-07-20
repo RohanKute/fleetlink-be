@@ -20,8 +20,8 @@ This service handles vehicle management, availability checking, and booking oper
 
 ### 1. **Clone the repo**
 ```bash
-git clone https://github.com/your-username/fleetlink-backend.git
-cd fleetlink-backend
+git clone https://github.com/RohanKute/fleetlink-be.git
+cd fleetlink-be
 ````
 
 ### 2. **Install dependencies**
